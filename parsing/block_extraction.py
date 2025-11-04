@@ -112,7 +112,7 @@ def table_name_from_block_or_filename(block: str, base_filename: str) -> str:
 
     stem = os.path.splitext(os.path.basename(base_filename))[0]
     u = stem.upper()
-    for suf in ["_PROC", "_PROCEDURE", "_PRC", "_proc"]:
+    for suf in ["_PROC", "_PROCEDURE", "_PRC", "_proc", "_prc"]:
         if u.endswith(suf):
             stem = stem[:-len(suf)]
             u = stem.upper()

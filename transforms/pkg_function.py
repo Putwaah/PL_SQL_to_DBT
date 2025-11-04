@@ -31,7 +31,7 @@ def transform_pkg_functions_to_macros(sql: str) -> str:
 
         args_str = sql[open_paren + 1: close_paren]
         original_call = sql[m.start(): close_paren + 1]
-        macro_call = f"{{{{ {ns}.{func.lower()}({args_str}) }}}} /* ORA_FUNC: {original_call} */"
+        macro_call = f"/* ORA_FUNC: {original_call} */"
 
         out.append(macro_call)
         i = close_paren + 1
