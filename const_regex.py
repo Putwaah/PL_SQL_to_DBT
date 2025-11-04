@@ -2,10 +2,39 @@ import re
 
 # --- REPLACE ROWNUM / SYSDATE ---
 RE_TRIPLE_ROWNUM_SYSDATE = re.compile(r"""
-    \bROWNUM\b \s+ (?:AS\s+)?ROW_NUMBER_ID \s* , \s*
-    \bSYSDATE\b \s+ (?:AS\s+)?ROW_CREATION_DATE \s* , \s*
-    \bSYSDATE\b \s+ (?:AS\s+)?ROW_LAST_UPDATE_DATE
+    (?:
+      (?<!\w)ROWNUM(?!\w)\s+(?:AS\s+)?(?:"?ROW_NUMBER_ID"?)
+    )\s* , \s*
+    (?:
+      (?<!\w)SYSDATE(?!\w)\s+(?:AS\s+)?(?:"?ROW_CREATION_DATE"?)
+    )\s* , \s*
+    (?:
+      (?<!\w)SYSDATE(?!\w)\s+(?:AS\s+)?(?:"?ROW_LAST_UPDATE_DATE"?)
+    )
+    (?P<trailing>\s*,)?     # si le bloc n'est pas en dernière position de la liste SELECT
 """, re.IGNORECASE | re.VERBOSE | re.DOTALL)
+
+
+RE_ROWNUM_ONE = re.compile(
+    r'(?<!\w)ROWNUM(?!\w)\s+(?:AS\s+)?(?:"?ROW_NUMBER_ID"?)\b',
+    re.IGNORECASE
+)
+RE_SYSDATE_CRE = re.compile(
+    r'(?<!\w)SYSDATE(?!\w)\s+(?:AS\s+)?(?:"?ROW_CREATION_DATE"?)\b',
+    re.IGNORECASE
+)
+RE_SYSDATE_UPD = re.compile(
+    r'(?<!\w)SYSDATE(?!\w)\s+(?:AS\s+)?(?:"?ROW_LAST_UPDATE_DATE"?)\b',
+    re.IGNORECASE
+)
+
+RE_SELECT_LIST = re.compile(r"(?is)\bSELECT\b(?P<select>.+?)\bFROM\b")
+
+
+RE_GROUP_BY_BLOCK = re.compile(
+    r'(?is)\bGROUP\s+BY\b(?P<gb>.+?)(?=(\bHAVING\b|\bORDER\s+BY\b|\bQUALIFY\b|\bLIMIT\b|\bFETCH\b|\bWINDOW\b|\bFOR\s+UPDATE\b|$))'
+)
+RE_SYS_ROW_GROUP_BY =  re.compile(r'((?:^|,)\s*)(?:ROWNUM|SYSDATE)\s*(?=(?:,|$))', re.IGNORECASE)
 
 # Remplace la macro scalaire par la colonne issue de la CTE
 RE_PO_BUYER_SCALAR = re.compile(
