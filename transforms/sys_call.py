@@ -53,7 +53,7 @@ def normalize_oracle_rownum_sysdate(sql: str) -> str:
             return ""
 
         # Sinon, reconstruire la clause intacte
-        return f"GROUP BY {cleaned}"
+        return f"GROUP BY {cleaned}\n"
 
     sql3 = RE_GROUP_BY_BLOCK.sub(_clean_group_by, sql2)
 
