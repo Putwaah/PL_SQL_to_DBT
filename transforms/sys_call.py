@@ -7,7 +7,7 @@ def normalize_oracle_rownum_sysdate(sql: str) -> str:
     Remplace ROWNUM/SYSDATE dans la liste SELECT par leurs équivalents Snowflake
     et supprime ROWNUM/SYSDATE du GROUP BY s'ils y figurent.
 
-    - ROWNUM AS ROW_NUMBER_ID      -> seq8() + 1 AS ROW_NUMBER_ID
+    - ROWNUM AS ROW_NUMBER_ID      -> seq8.NEXTVAL as ROW_NUMBER_ID
     - SYSDATE AS ROW_CREATION_DATE -> current_timestamp() AS ROW_CREATION_DATE
     - SYSDATE AS ROW_LAST_UPDATE_DATE -> current_timestamp() AS ROW_LAST_UPDATE_DATE
 
@@ -18,7 +18,7 @@ def normalize_oracle_rownum_sysdate(sql: str) -> str:
     def _triple_repl(m: re.Match) -> str:
         trailing = m.group('trailing') or ''
         return (
-            " ROW_NUMBER() OVER (ORDER BY NULL) AS ROW_NUMBER_ID,\n"
+            "seq8() + 1 ROW_NUMBER_ID,\n"
             "current_timestamp() AS ROW_CREATION_DATE,\n"
             "current_timestamp() AS ROW_LAST_UPDATE_DATE" + trailing
         )
@@ -28,7 +28,7 @@ def normalize_oracle_rownum_sysdate(sql: str) -> str:
 
         s = RE_TRIPLE_ROWNUM_SYSDATE.sub(_triple_repl, select_list)
 
-        s = RE_ROWNUM_ONE.sub("ROW_NUMBER() OVER (ORDER BY NULL)  AS ROW_NUMBER_ID", s)
+        s = RE_ROWNUM_ONE.sub("seq8() + 1  AS ROW_NUMBER_ID", s)
         s = RE_SYSDATE_CRE.sub("current_timestamp() AS ROW_CREATION_DATE", s)
         s = RE_SYSDATE_UPD.sub("current_timestamp() AS ROW_LAST_UPDATE_DATE", s)
 

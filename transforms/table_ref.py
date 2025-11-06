@@ -18,7 +18,6 @@ def extract_cte_names(sql):
 def transform_table_references(sql, mode):
     """Transforms table references with the appropriate schemas, excluding CTEs."""
     cte_names = extract_cte_names(sql)
-    print("cte_names:", cte_names)
 
     def replacer(match):
         keyword = match.group(1)
