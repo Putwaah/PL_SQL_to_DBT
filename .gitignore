@@ -1,8 +1,8 @@
-data
+data*
 dbt_models
 logs
-my_project
-packagePLSQL_silver
+my_project*
+package*
 venv
 __pycache__
 *.png

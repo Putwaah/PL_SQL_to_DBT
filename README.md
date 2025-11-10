@@ -76,30 +76,31 @@ Configurer votre fichier `profiles.yml` avec vos credentials :
 
 ```yaml
 my_project:
-  target: dev
   outputs:
-    dev:
-      type: oracle
-      host: your-oracle-host
-      port: 1521
-      user: your-username
-      password: your-password
+    your-environment-name:
+      account: your-account
       database: your-database
-      schema: your-schema
-      threads: 4
+      password: your-password
+      role: your-role
+      schema: your-schema-silver
+      threads: 42
+      type: snowflake
+      user: your-username
+      warehouse: your-warehouse
+  target: one-of-your-environment-names
 ```
 
 ## 📁 Structure du projet
 
 ```bash
 PL_SQL_to_DBT/
-├── data/                 
+├── data/
 │    └── PKG_PL/SQL.sql
-├── macros/                 
+├── macros/
 │    └── cte_utils.py
-├── parsing/               
+├── parsing/
 │    └── block_extraction.py
-├── pipeline/                  
+├── pipeline/
 │    └── normalization_dbz.py
 ├── runner/
 │    └── process.py
@@ -112,7 +113,7 @@ PL_SQL_to_DBT/
 │    └── table_ref.py
 ├── utils/
 │    └── navigation_sql.py
-│    └── str_utils.py          
+│    └── str_utils.py
 ├── const_regex.py
 └── main.py
 ```
@@ -136,14 +137,14 @@ CREATE OR REPLACE PROCEDURE calculate_customer_ltv AS
 BEGIN
   [...]
   TRUNCATE TABLE customer_ltv;
-  
+
   INSERT INTO customer_ltv
-  SELECT 
+  SELECT
     customer_id,
     SUM(order_total) as lifetime_value
   FROM orders
   GROUP BY customer_id;
-  
+
   COMMIT;
 END;
 ```
@@ -157,7 +158,7 @@ En dbt, cela devient :
     transient=true,
     alias='customer_ltv'
 ) }}
-SELECT 
+SELECT
     customer_id,
     SUM(order_total) as lifetime_value
 FROM {{ ref('stg_orders') }}
@@ -179,7 +180,7 @@ models:
         tests:
           - unique
           - not_null
-      
+
       - name: customer_id
         description: "Foreign key to customers"
         tests:
@@ -187,7 +188,7 @@ models:
           - relationships:
               to: ref('stg_customers')
               field: customer_id
-      
+
       - name: order_total
         description: "Total order amount"
         tests:
@@ -207,7 +208,7 @@ models:
     columns:
       - name: customer_id
         description: "Unique customer identifier"
-        
+
       - name: customer_lifetime_days
         description: "Number of days between first and last order"
         meta:
