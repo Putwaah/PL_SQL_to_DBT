@@ -1,4 +1,4 @@
-import re 
+import re
 from const_regex import RE_TRIPLE_ROWNUM_SYSDATE, RE_PO_BUYER_SCALAR, RE_INS,RE_INS_VALUES,RE_INS_SEL_WITH,RE_SEL_OR_WITH,RE_TABLE_FROM_INS,RE_CTAS_OR_VIEW,EXCLUDE_MACROS,RE_JINJA_MACRO_CALL,RE_PARSE_INSERT_VALUES,JINJA_CALL_RE,MACRO_NAMESPACE,PKG_FUNC_START
 
 
@@ -164,5 +164,26 @@ def strip_optimizer_hints(s: str) -> str:
 def strip_tail_paren_and_semicolon(sql: str) -> str:
     """Delete the ; and ) at the ending"""
     s = re.sub(r";\s*$", "", sql.rstrip())
-    s = re.sub(r"\)\s*$", "", s)
+
+    # Count parenthese depth
+    len_sql = len(sql) - 1
+    parenthese_depth = 0
+    string = None
+    i = 0
+    while i < len_sql:
+        if string != None:
+            if string == sql[i]:
+                string == None
+        else:
+            if sql[i] in ["'", '"']:
+                string = sql[i]
+            elif sql[i] == '(':
+                parenthese_depth += 1
+            elif sql[i] == ')':
+                parenthese_depth -= 1
+        i += 1
+
+    # If it's bellow 0, it mean that there is a close parenthese to remove
+    if parenthese_depth < 0:
+        s = re.sub(r"\)\s*$", "", s)
     return s.rstrip()

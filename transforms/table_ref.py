@@ -33,13 +33,13 @@ def transform_table_references(sql, mode):
             if table.lower().endswith('_bz'):
                 table_name = table[:-3]
                 return f"{keyword} DEV.LH2_BRONZE_DEV.{table_name}"
-            return f"{keyword} DEV.LH2_SILVER_DEV.{table}"
+            return f"{keyword} {{{{ref('{table.upper()}')}}}}"
 
         if mode == "silver to gold":
             if table.lower().endswith('_sv'):
-                table_name = table[:-3]
-                return f"{keyword} DEV.LH2_SILVER_DEV.{table_name}"
-            return f"{keyword} DEV.LH2_GOLD_DEV.{table}"
+                table = table[:-3]
+            return f"{keyword} {{{{ref('{table.upper()}')}}}}"
+
 
         return match.group(0)
 

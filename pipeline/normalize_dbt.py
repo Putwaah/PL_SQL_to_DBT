@@ -93,15 +93,19 @@ def convert_insert_values_to_select_union(block: str) -> str:
 
 
 # ---------- Header dbt ----------
-def generate_dbt_config(table_name: str) -> str:
+def generate_dbt_config(table_name: str, mode: str) -> str:
     """
     generate header for dbt
     """
     transient = "true" if "TEMP" in table_name.upper() else "false"
-    return f"""
-{{{{ config(
+
+    schema = "SILVER"
+    if mode == "silver to gold":
+        schema = "GOLD"
+    return f"""{{{{ config(
     materialized='table',
     transient={transient},
+    schema='{schema}'
     alias='{table_name}'
 ) }}}}
 """

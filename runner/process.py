@@ -31,17 +31,18 @@ def process_sql_file(file_path: str, output_dir: str, mode: str) -> bool:
     os.makedirs(output_dir, exist_ok=True)
 
     for i, raw_block in enumerate(blocks, start=1):
-        table_name = table_name_from_block_or_filename(raw_block, base_filename)
-        header = generate_dbt_config(table_name)
+        table_name = table_name_from_block_or_filename(raw_block, base_filename).upper()
+        header = generate_dbt_config(table_name, mode)
+
         # 1) Normalisation principale
         body = normalize_block_for_dbt(raw_block)
 
-        # 4) Remplacement package -> macros scalaires
+        # 2) Remplacement package -> macros scalaires
         body = transform_pkg_functions_to_macros(body)
         body = rewrite_oracle_plus_joins(body)
         body = move_order_by_outside_pivot(body)
 
-        # 5) Suite (réécriture FROM/JOIN + normalisation)
+        # 3) Suite (réécriture FROM/JOIN + normalisation)
         dbt_model = header + "\n" + body + "\n"
         dbt_model = transform_table_references(dbt_model, mode)
         dbt_model = normalize_oracle_rownum_sysdate(dbt_model)
