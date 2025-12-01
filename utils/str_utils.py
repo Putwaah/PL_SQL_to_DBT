@@ -166,20 +166,20 @@ def strip_tail_paren_and_semicolon(sql: str) -> str:
     s = re.sub(r";\s*$", "", sql.rstrip())
 
     # Count parenthese depth
-    len_sql = len(sql) - 1
+    len_sql = len(s)
     parenthese_depth = 0
     string = None
     i = 0
     while i < len_sql:
         if string != None:
-            if string == sql[i]:
-                string == None
+            if string == s[i]:
+                string = None
         else:
-            if sql[i] in ["'", '"']:
-                string = sql[i]
-            elif sql[i] == '(':
+            if s[i] in ["'", '"']:
+                string = s[i]
+            elif s[i] == '(':
                 parenthese_depth += 1
-            elif sql[i] == ')':
+            elif s[i] == ')':
                 parenthese_depth -= 1
         i += 1
 

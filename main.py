@@ -3,7 +3,7 @@ import os
 from runner.process import process_sql_file
 
 def main():
-    
+
     if len(sys.argv) != 2:
         print("Usage: python convert_to_dbt.py <path_to_sql_folder>")
         return
@@ -13,7 +13,7 @@ def main():
     if not os.path.isdir(input_folder):
         print(f"Error: {input_folder} is not a valid directory.")
         return
-    
+
     print("Choose the conversion layer :")
     print("1) Bronze → Silver")
     print("2) Silver → Gold")

@@ -30,6 +30,8 @@ def process_sql_file(file_path: str, output_dir: str, mode: str) -> bool:
     stem = os.path.splitext(base_filename)[0]
     os.makedirs(output_dir, exist_ok=True)
 
+    tables_file = dict()
+
     for i, raw_block in enumerate(blocks, start=1):
         table_name = table_name_from_block_or_filename(raw_block, base_filename).upper()
         header = generate_dbt_config(table_name, mode)
@@ -43,16 +45,34 @@ def process_sql_file(file_path: str, output_dir: str, mode: str) -> bool:
         body = move_order_by_outside_pivot(body)
 
         # 3) Suite (réécriture FROM/JOIN + normalisation)
-        dbt_model = header + "\n" + body + "\n"
-        dbt_model = transform_table_references(dbt_model, mode)
-        dbt_model = normalize_oracle_rownum_sysdate(dbt_model)
-        out_name = f"{stem}.sql" if len(blocks) == 1 else f"{stem}_pt{i}.sql"
-        out_path = os.path.join(output_dir, out_name)
+        body = transform_table_references(body, mode)
+        body = normalize_oracle_rownum_sysdate(body)
 
-        try:
-            with open(out_path, "w", encoding="utf-8") as out_f:
-                out_f.write(dbt_model)
-        except Exception as e:
-            print(f"[ERROR] {out_name}: Failed to write output file - {e}")
+        # Si la table n'est dans aucun fichier, on lui créer son fichier
+        if table_name not in tables_file.keys():
+            # 4) Création du fichier finale et du nom de fichier
+            dbt_model = header + "\n" + body + "\n"
+            out_name = f"{table_name}.sql"
+            out_path = os.path.join(output_dir, out_name)
+            tables_file[table_name] = out_path
 
+            # 5) Écriture dans le fichier
+            try:
+                with open(out_path, "w", encoding="utf-8") as out_f:
+                    out_f.write(dbt_model)
+            except Exception as e:
+                print(f"[ERROR] {out_name}: Failed to write output file - {e}")
+
+        # Sinon on récupère le fichier de la table et on ajoute un autre body
+        else:
+            # 4) Création du fichier finale et du nom de fichier
+            dbt_model = "\n\nUNION ALL\n\n" + body
+            out_path = tables_file[table_name]
+
+            # 5) Écriture dans le fichier
+            try:
+                with open(out_path, "a", encoding="utf-8") as out_f:
+                    out_f.write(dbt_model)
+            except Exception as e:
+                print(f"[ERROR] {out_name}: Failed to write output file - {e}")
     return True
