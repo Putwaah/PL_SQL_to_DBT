@@ -1,6 +1,7 @@
 import re
 from utils.str_utils import split_top_level_commas, strip_leading_comments, strip_optimizer_hints, strip_tail_paren_and_semicolon, split_top_level_tuples
 from const_regex import RE_INS_SEL_WITH, RE_INS_VALUES, RE_CTAS_OR_VIEW, RE_SEL_OR_WITH, RE_PARSE_INSERT_VALUES
+from utils.defines import SILVER_LAYER, GOLD_LAYER
 
 # ---------- DBT Standardization ----------
 
@@ -99,9 +100,9 @@ def generate_dbt_config(table_name: str, mode: str) -> str:
     """
     transient = "true" if "TEMP" in table_name.upper() else "false"
 
-    schema = "SILVER"
+    schema = SILVER_LAYER
     if mode == "silver to gold":
-        schema = "GOLD"
+        schema = GOLD_LAYER
     return f"""{{{{ config(
     materialized='table',
     transient={transient},

@@ -1,4 +1,5 @@
 import re
+from utils.defines import BRONZE_LAYER
 
 def extract_cte_names(sql):
     """Extracts all CTE names from a WITH clause using comma separation."""
@@ -27,12 +28,12 @@ def transform_table_references(sql, mode):
             return match.group(0)
 
         if table.lower() == 'steph_apps_fnd_flex_values#_bz':
-            return f"{keyword} DEV.LH2_BRONZE_DEV.steph_apps_FND_FLEX_VALUES"
+            return f"{keyword} {BRONZE_LAYER}.steph_apps_FND_FLEX_VALUES"
 
         if mode == "bronze to silver":
             if table.lower().endswith('_bz'):
                 table_name = table[:-3]
-                return f"{keyword} DEV.LH2_BRONZE_DEV.{table_name}"
+                return f"{keyword} {BRONZE_LAYER}.{table_name}"
             return f"{keyword} {{{{ref('{table.upper()}')}}}}"
 
         if mode == "silver to gold":
